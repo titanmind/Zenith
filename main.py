@@ -1,4 +1,3 @@
-#test5
 """
 Zenith – entry point.
 """
