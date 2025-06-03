@@ -1,0 +1,365 @@
+```
+Name: Zenith
+Platform: desktop PC
+Technologies: Pygame
+Player(s): single‑player
+Controls: mouse + keyboard
+Genre: space‑exploration, procedural‑generation
+
+
+
+/=================\
+  GAME PILLARS
+\=================/
+
+  • Seamless   – no loading cuts between space, orbit, landing, surface.  
+  • Wonder‑Driven   – awe of discovery > loot grind.  
+  • Tactile Sim   – every ship/planet parameter is simulated & player‑readable.  
+  • Player‑Authored   – procedural galaxy + light narrative let players tell their own story.
+
+
+
+/================================\
+  PLAYER‑EXPERIENCE (PX) FLOW
+\================================/
+
+  Moment Loop     :  Explore ➜ scan ➜ land ➜ gather / repair / upgrade ➜ take‑off.  
+  Mid‑Term Loop   :  Rebuild ship systems, unlock warp nodes, extend jump range.  
+  Long‑Term Goal  :  Reach galactic core & uncover AI’s origin while fully upgrading Zenith.  
+  Failure State   :  Hull 0% OR life‑support offline for >60s ⇒ respawn at last save.  
+  Recovery        :  Emergency‑pod save automatically triggers before fatal states.
+
+
+
+/==============================\
+  GAME MODES / CAMERA VIEWS
+\==============================/
+
+  • Ship Flight View        – 2‑D top‑down orbit & transit.  
+  • Ship Interior Overlay   – first‑person side‑scroll walk inside hull.  
+  • Surface Platforming     – cylindrical “ring” ground (Mario‑Galaxy style).  
+  • Galactic Map Overlay    – pan/zoom starmap & warp‑node plotting.  
+  • Menus / Overlays        – pause, inventory, computer terminal, etc.
+
+
+
+/=============\
+  CORE SYSTEMS
+\=============/
+
+  Ship Systems
+    propulsion | navigation | life‑support | AI | scanner | landing/take‑off |
+    weapons | power | communications | hull | shields
+
+  Procedural‑Generation Service
+    star‑system → planet → biome pipeline (see Content Tables)
+
+  Weather & Day/Night
+    dynamic sky‑tint from star color, planetary rotation, storms interact with flora.
+
+  Inventory & Crafting
+    resources → refined materials → modules.  Fabricator bench inside ship.
+
+  Research / Science Panel
+    analyze artifacts, unlock tech upgrades, reveal lore logs.
+
+  Save/Load
+    JSON “delta” per in‑game day: seed + player‑state + modified‑objects.  Forward‑compatible version tag.
+
+  Audio
+    single ambient track per mode + lightweight SFX palette.
+
+  UI/Accessibility
+    full key‑rebinding; color‑blind safe palette; optional camera shake & motion blur toggles.
+
+
+
+/===========================\
+  TECHNICAL ARCHITECTURE
+\===========================/
+
+  • Min spec: 2.5 GHz dual‑core, iGPU, 4 GB RAM, 1080p@60 FPS.  
+  • Logic rate: fixed 60 Hz; render uncapped vsync.  
+  • Data‑oriented ECS for entities; Pygame surfaces for vector art.  
+  • Physics: simple Verlet on space bodies, box‑collision on surface.  
+  • Dev Tools: hot‑reload seeds, in‑game profiler overlay.
+
+
+
+/======================\
+  PRODUCTION ROADMAP
+\======================/
+
+  ┌──────────┬───────────────────────────────────────────────┐
+  │ Phase    │ Must‑Have                                    │
+  ├──────────┼───────────────────────────────────────────────┤
+  │ Prototype│ single G‑class star; 3 planets; flight &     │
+  │ (3 mo)   │ landing loop; interior walk; basic crafting. │
+  ├──────────┼───────────────────────────────────────────────┤
+  │ Alpha    │ full seed gen; warp map; research tree;      │
+  │ (6 mo)   │ weapon & shield combat; save/load.           │
+  ├──────────┼───────────────────────────────────────────────┤
+  │ Beta     │ weather events; abandoned stations; CRT UI;  │
+  │ (4 mo)   │ accessibility options; polished audio.       │
+  └──────────┴───────────────────────────────────────────────┘
+
+  Nice‑to‑have post‑1.0: binary stars, plasma lightning, pet companions.
+
+
+
+/=======\
+  STYLE
+\=======/
+
+  simple vector art (procedurally generated) for planets/stars  
+  vector art for space stations, ship, fauna, player  
+  vector art for planet surfaces/biomes/flora  
+
+  ship‑computer & overlays → retro CRT aesthetic  
+  ambient music / background noise everywhere  
+  lightweight, consistent sound‑effects palette
+
+
+
+/===================================\
+  OVERALL STRUCTURE OF STAR SYSTEMS
+\===================================/
+
+  star (or binary/trinary) at center  
+  planets & moons orbit elliptically & rotate  
+  space stations orbit primary body  
+  dynamic shading on planets tied to orbit position
+
+
+
+/=======================\
+  GAME STARTUP SEQUENCE
+\=======================/
+
+  cyan triangle with green border; sheen bar passes  
+  fade‑in triangle → fade‑out → fade‑in title → fade‑out → fade‑in game
+
+  intro: ship drifts; systems offline except life‑support; AI message diverts
+  power to propulsion; auto‑crash‑lands at nearest survivable biome.
+
+
+
+/=======================\
+  UI / INTERACTION LAYERS
+\=======================/
+
+  menu (ESC)         – settings | save | load | exit  
+  computer overlay   – retro CRT CLI  
+  ship interior      – walkable side view  
+  ship flight        – top‑down  
+  surface platform   – planetoid ring  
+  player inventory   – grid overlay  
+  external inventory – when looting containers  
+  system panels      – cockpit | engineering | science  
+  galactic view      – starmap overlay
+
+
+
+/==============\
+  SHIP FLIGHT
+\==============/
+
+  parallax starfield (seed‑locked)  
+  planets occlude sunlight shafts  
+  zoom‑in while approaching body; auto‑align for landing corridor  
+  hotkeys:  
+    • mouse aim → nose follows cursor  
+    • WASD thrust (particle exhaust)  
+    • ‘C’ lock orientation  
+    • ‘Q’ toggle interior overlay  
+  minimap tied to navigation level.
+
+
+
+/===============\
+  SHIP INTERIOR
+\===============/
+
+  walk with A/D, jump Space (low‑G float if life‑support off).  
+  interact keys:  
+    ‘E’ – panels   ‘F’ – pick/drop   ‘Q’ – exit to flight  
+  adjustable music & lighting via computer.  Background space
+  scene dimmed but live.
+
+
+
+/==================================\
+  SURFACE PLATFORMING (PLANET / MOON)
+\==================================/
+
+  cylindrical ground ring scrolling beneath player  
+  variable gravity (from planet radius)  
+  dynamic day/night; starfield visible at night  
+  landing animation blends from flight to ring seamlessly.
+
+
+
+/===============\
+  GALACTIC VIEW
+\===============/
+
+  unlockable navigation mode; shows discovered systems, warp nodes, fuel
+  cost, and estimated in‑system manual‑flight time.  Manual flying possible
+  but x1000 slower than warp.
+
+
+
+/======\
+  MENU
+\======/
+
+  ESC overlay
+    • Sound FX volume
+    • Music volume
+    • Resolution
+    • UI scaling
+    • Control bindings
+    • Credits
+    • Save / Load
+    • Exit
+
+
+
+/=========\ 
+  COCKPIT
+\=========/
+
+  must be seated to control ship  
+  HUD: velocity, shield, hull, scanner readout, comms panel  
+  comms key ‘R’ – hail station/ship if within range.
+
+
+
+/===============\
+  SHIP COMPUTER
+\===============/
+
+  retro CRT command line (green phosphor)  
+  tasks: query AI, read logs, control music/lighting, trigger science scans,
+  run diagnostics.
+
+
+
+/===================\
+  ENGINEERING PANEL
+\===================/
+
+  live status bars for each system; toggle power; route spare parts to
+  damaged modules; upgrade sockets (tier I‑III).
+
+
+
+/===============\
+  SCIENCE PANEL
+\===============/
+
+  queue research (artifacts/resources) → unlock blueprints, lore entries,
+  stat boosts.  Research speed scales with power + lab upgrades.
+
+
+
+/===================================================================\
+  CONTENT TABLES – SEEDS & AXES
+\===================================================================/
+
+  star‑system:
+    primary star spectral class …… {O, B, A, F, G, K, M, White Dwarf, Red Giant}
+    luminosity multiplier ………… 0.2 – 50× Sun
+    interstellar dust density …… 0–1
+    background starfield seed
+    [planets]
+
+  planet:
+    type ……………………………… terrestrial | oceanic | desert | ice | lava |
+                               gas‑giant | dwarf‑rock | barren
+    radius …………………………… 800 km – 70 000 km  (affects gravity 0.05–3 g)
+    axial tilt …………………… 0°–45°
+    orbital eccentricity ……… 0–0.4
+    rotation period …………… 3h–120h
+    water amount ………………… 0–1
+    volcanic activity ………… 0–1
+    storm frequency …………… 0–1
+    magnetosphere strength …… 0–1  (aurora intensity)
+    ring system ………………… boolean
+    [moons]
+    [biomes]
+
+  biome:
+    temp …………………………… −80°C – +60°C
+    moisture …………………… 0–1
+    elevation …………………… sea‑level offset ±6km
+    fertility …………………… 0–1
+    atmosphere density ……… 0.1–3.0 atm
+    [flora]
+    [fauna]
+    [resources]
+
+  flora archetypes:
+    broadleaf tree | conifer | giant mushroom | cactus | fern |
+    grass | floating aquatic | bioluminescent vine | crystal sapling | ash‑bloom
+
+  fauna archetypes:
+    small grazer | large grazer | pack predator | solo apex | scavenger |
+    burrowing omnivore | flying flier | aquatic hunter | insectoid swarm |
+    ambient critter
+
+  biome archetypes:
+    polar ice | tundra | taiga | temperate forest | plains | desert |
+    savanna | rainforest | swamp | alpine | volcanic | ocean | crater‑basin |
+    glacial desert
+
+  resources:
+    common metal ore | precious metals | rare crystals | radioactives |
+    organic biomass | water‑ice | hydrocarbon seeps | ancient artifacts
+
+  weather:
+    clear sky | partly cloudy | overcast |
+    drizzle | steady rain | tropical downpour | thunderstorm | acid rain |
+    flurries | snowstorm | blizzard |
+    dust devils | sandstorm | ash storm |
+    eruption plume | lava fountaining |
+    high winds | breeze |
+    aurora | ion storm | plasma lightning |
+    meteor shower | radiation storm |
+    ground fog | toxic mist
+    parameters: precipitation rate | wind speed | visibility |
+                lightning freq | hazard level | ambient light
+
+
+
+/==========\
+  STATIONS
+\==========/
+
+  orthogonal rooms & corridors; procedurally wired power grid  
+  abandoned tiers: dark → standby → partially active → fully lit  
+  elevators & doors require reactor restart or battery swap.
+
+
+
+/================\
+  ACCESSIBILITY
+\================/
+
+  • Full key‑rebinding  
+  • Color‑blind friendly palette presets  
+  • Toggle screen shake, motion blur, parallax strength  
+  • Font‑size slider for CRT text
+
+
+
+/========================\
+  APPENDIX – HOTKEYS
+\========================/
+
+  Flight:   WASD thrust   • Mouse – nose aim   • C – lock heading  
+  Toggle:   Q – interior/flight   • ESC – menu  
+  Cockpit:  R – comms hail  
+  Interior: A/D walk   • Space jump   • E interact   • F carry  
+  Global:   F5 quick‑save   • F9 quick‑load   • F2 screenshot
+```
